@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -26,22 +27,22 @@ public class DownloaderTaskFragment extends Fragment {
 
 		// Preserve across reconfigurations
 		setRetainInstance(true);
-		
-		// TODO: Create new DownloaderTask that "downloads" data
 
-        
-		
-		// TODO: Retrieve arguments from DownloaderTaskFragment
-		// Prepare them for use with DownloaderTask. 
+        // TODO: Create new DownloaderTask that "downloads" data
+        DownloaderTask downloaderTask = new DownloaderTask();
 
-        
-        
-        
-		// TODO: Start the DownloaderTask 
-		
-        
 
-	}
+        // TODO: Retrieve arguments from DownloaderTaskFragment
+        // Prepare them for use with DownloaderTask.
+        Bundle args=getArguments();
+        ArrayList<Integer> friends = args.getIntegerArrayList(MainActivity.TAG_FRIEND_RES_IDS);
+
+        // TODO: Start the DownloaderTask
+
+        Integer[] friendList = new Integer[friends.size()];
+        friends.toArray(friendList);
+        downloaderTask.execute(friendList);
+    }
 
 	// Assign current hosting Activity to mCallback
 	// Store application context for use by downloadTweets()
@@ -73,65 +74,58 @@ public class DownloaderTaskFragment extends Fragment {
 	// out). Ultimately, it must also pass newly available data back to 
 	// the hosting Activity using the DownloadFinishedListener interface.
 
-//	public class DownloaderTask extends ... {
-	
+	public class DownloaderTask extends AsyncTask<Integer, Void, String[]> {
 
-    
-    
-    
-    
-    
-    
-    
+        @Override
+        protected String[] doInBackground(Integer... resIDS) {
+            return downloadTweets(resIDS);
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            mCallback.notifyDataRefreshed(strings);
+        }
+
         // TODO: Uncomment this helper method
-		// Simulates downloading Twitter data from the network
+        // Simulates downloading Twitter data from the network
+        private String[] downloadTweets(Integer resourceIDS[]) {
+            final int simulatedDelay = 2000;
+            String[] feeds = new String[resourceIDS.length];
+            try {
+                for (int idx = 0; idx < resourceIDS.length; idx++) {
+                    InputStream inputStream;
+                    BufferedReader in;
+                    try {
+                        // Pretend downloading takes a long time
+                        Thread.sleep(simulatedDelay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-        /*
-         private String[] downloadTweets(Integer resourceIDS[]) {
-			final int simulatedDelay = 2000;
-			String[] feeds = new String[resourceIDS.length];
-			try {
-				for (int idx = 0; idx < resourceIDS.length; idx++) {
-					InputStream inputStream;
-					BufferedReader in;
-					try {
-						// Pretend downloading takes a long time
-						Thread.sleep(simulatedDelay);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+                    inputStream = mContext.getResources().openRawResource(
+                            resourceIDS[idx]);
+                    in = new BufferedReader(new InputStreamReader(inputStream));
 
-					inputStream = mContext.getResources().openRawResource(
-							resourceIDS[idx]);
-					in = new BufferedReader(new InputStreamReader(inputStream));
+                    String readLine;
+                    StringBuffer buf = new StringBuffer();
 
-					String readLine;
-					StringBuffer buf = new StringBuffer();
+                    while ((readLine = in.readLine()) != null) {
+                        buf.append(readLine);
+                    }
 
-					while ((readLine = in.readLine()) != null) {
-						buf.append(readLine);
-					}
+                    feeds[idx] = buf.toString();
 
-					feeds[idx] = buf.toString();
+                    if (null != in) {
+                        in.close();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-					if (null != in) {
-						in.close();
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			return feeds;
-		}
-         */
+            return feeds;
+        }
 
 
-    
-    
-    
-    
-    
-    
-
+    }
 }
